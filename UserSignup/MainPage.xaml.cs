@@ -1,24 +1,43 @@
-﻿namespace UserSignup
+﻿using System.Text.RegularExpressions;
+
+namespace UserSignup;
+
+public partial class MainPage : ContentPage
 {
-    public partial class MainPage : ContentPage
+    public MainPage()
     {
-        int count = 0;
+        InitializeComponent();
+    }
 
-        public MainPage()
+    private async void OnSignUpClicked(object sender, EventArgs e)
+    {
+        ErrorLabel.IsVisible = false;
+
+        if (string.IsNullOrWhiteSpace(UsernameEntry.Text) ||
+            string.IsNullOrWhiteSpace(EmailEntry.Text) ||
+            string.IsNullOrWhiteSpace(PasswordEntry.Text) ||
+            string.IsNullOrWhiteSpace(ConfirmPasswordEntry.Text))
         {
-            InitializeComponent();
+            ErrorLabel.Text = "Please fill out all fields.";
+            ErrorLabel.IsVisible = true;
+            return;
         }
 
-        private void OnCounterClicked(object? sender, EventArgs e)
+        if (!Regex.IsMatch(EmailEntry.Text, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
         {
-            count++;
-
-            if (count == 1)
-                CounterBtn.Text = $"Clicked {count} time";
-            else
-                CounterBtn.Text = $"Clicked {count} times";
-
-            SemanticScreenReader.Announce(CounterBtn.Text);
+            ErrorLabel.Text = "Please enter a valid email.";
+            ErrorLabel.IsVisible = true;
+            return;
         }
+
+        if (PasswordEntry.Text != ConfirmPasswordEntry.Text)
+        {
+            ErrorLabel.Text = "Passwords do not match.";
+            ErrorLabel.IsVisible = true;
+            return;
+        }
+
+        await Shell.Current.GoToAsync(
+            $"{nameof(ProfilePage)}?username={UsernameEntry.Text}&email={EmailEntry.Text}");
     }
 }
